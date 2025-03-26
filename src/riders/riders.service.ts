@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateRiderDto } from './dto/create-rider.dto';
 import { UpdateRiderDto } from './dto/update-rider.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { Prisma } from '@prisma/client';
 import { CreateLocationDto } from './dto/create-location.dto';
 
 @Injectable()
