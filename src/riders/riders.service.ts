@@ -13,7 +13,7 @@ export class RidersService {
     if (!createRiderDto) {
       throw new BadRequestException('Invalid data: Rider data is required'); // Throws a 400
     }
-
+    
     const createdRider = await this.databaseService.rider.create({ data: createRiderDto });
     return { message: 'Rider created successfully', rider: createdRider };
   }
@@ -24,7 +24,7 @@ export class RidersService {
       throw new NotFoundException('No riders found');
     }
 
-    return { message: 'Riders fetched successfully', riders };
+    return { message: 'Riders fetched successfully', count: riders.length ,riders };
   }
 
   async findRiderById(id: number) {
@@ -63,12 +63,22 @@ export class RidersService {
       throw new NotFoundException(`Rider with ID ${id} not found`);
     }
   
+    // Check if the rider has a location before attempting to delete it
+    const location = await this.databaseService.location.findUnique({ where: { riderId: id } });
+  
+    if (location) {
+      try {
+        await this.databaseService.location.delete({ where: { riderId: id } });
+      } catch (error) {
+        throw new InternalServerErrorException('An error occurred while deleting the rider location');
+      }
+    }
+  
+    // Delete Rider
     try {
       await this.databaseService.rider.delete({ where: { id } });
-  
       return { message: `Rider with ID ${id} deleted successfully` };
     } catch (error) {
-      console.error('Error deleting rider:', error);
       throw new InternalServerErrorException('An error occurred while deleting the rider');
     }
   }
@@ -115,13 +125,13 @@ export class RidersService {
     const nearbyRiders = riders.filter(rider => {
       if (rider.location) {
         const distance = this.haversine(latitude, longitude, rider.location.latitude, rider.location.longitude);
-        console.log(`Distance from (${latitude}, ${longitude}) to (${rider.location.latitude}, ${rider.location.longitude}) is: ${distance} km`);
+        // console.log(`Distance from (${latitude}, ${longitude}) to (${rider.location.latitude}, ${rider.location.longitude}) is: ${distance} km`);
         return distance <= SEARCH_RADIUS_KM;
       }
       return false;
     });
   
-    return { message: `${nearbyRiders.length} riders found within 5 km`, riders: nearbyRiders };
+    return { message: `${nearbyRiders.length} riders found within 5 km`, count: riders.length, riders: nearbyRiders };
   }
 
     // Haversine formula to calculate the distance between two geo-coordinates (in km)
