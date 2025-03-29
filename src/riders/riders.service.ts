@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateRiderDto } from './dto/create-rider.dto';
 import { UpdateRiderDto } from './dto/update-rider.dto';
 import { DatabaseService } from '../database/database.service';
@@ -38,26 +38,38 @@ export class RidersService {
   }
 
   async updateRider(id: number, updateRiderDto: UpdateRiderDto) {
+    const rider = await this.databaseService.rider.findUnique({ where: { id } });
+  
+    if (!rider) {
+      throw new NotFoundException(`Rider with ID ${id} not found`);
+    }
+  
     try {
       const updatedRider = await this.databaseService.rider.update({
         where: { id },
         data: updateRiderDto,
       });
-      return { message: 'Rider updated successfully', rider: updatedRider };
+  
+      return { message: `Rider with ID ${id} updated successfully`, rider: updatedRider };
     } catch (error) {
-      throw new NotFoundException(`Rider with ID ${id} not found`);
+      throw new InternalServerErrorException('An error occurred while updating the rider');
     }
   }
 
   async removeRider(id: number) {
-    try {
-      const removedRider = await this.databaseService.rider.delete({
-        where: { id }
-      });
-
-      return { message: 'Rider deleted successfully' , rider: removedRider};
-    } catch (error) {
+    const rider = await this.databaseService.rider.findUnique({ where: { id } });
+  
+    if (!rider) {
       throw new NotFoundException(`Rider with ID ${id} not found`);
+    }
+  
+    try {
+      await this.databaseService.rider.delete({ where: { id } });
+  
+      return { message: `Rider with ID ${id} deleted successfully` };
+    } catch (error) {
+      console.error('Error deleting rider:', error);
+      throw new InternalServerErrorException('An error occurred while deleting the rider');
     }
   }
 
