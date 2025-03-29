@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsEmail } from 'class-validator';
 
 export class CreateRiderDto {
   @ApiProperty({ description: 'The first name of the rider' })
@@ -11,7 +11,7 @@ export class CreateRiderDto {
   lastName: string;
 
   @ApiProperty({ description: 'The email of the rider' })
-  @IsString()
+  @IsEmail()
   email: string;
 
   @ApiProperty({ description: 'The license plate of the rider' })
