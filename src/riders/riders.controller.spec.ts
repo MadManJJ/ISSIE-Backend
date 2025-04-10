@@ -51,7 +51,7 @@ describe('RidersController', () => {
 
       const result = await controller.create(createRiderDto);
       expect(result).toEqual(createRiderDto); // check if create from controller call createRider from service
-      expect(mockRidersService.createRider).toHaveBeenCalledWith(createRiderDto); // check if create from controller call createRider from service
+      expect(mockRidersService.createRider).toHaveBeenCalledWith(createRiderDto); // check if we call createRider in service with createRiderDto
     })
 
   });
@@ -67,7 +67,7 @@ describe('RidersController', () => {
   
       const result = await controller.findAll();
       expect(result).toEqual(mockRiders); // check if findAll from controller call findAllRiders from service
-      expect(mockRidersService.findAllRiders).toHaveBeenCalled(); // check if findAll from controller call findAllRiders from service
+      expect(mockRidersService.findAllRiders).toHaveBeenCalled(); // check if we call findAllRiders in service
     });
   });
 
